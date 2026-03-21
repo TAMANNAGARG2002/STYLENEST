@@ -1,60 +1,56 @@
 import os
-import requests
-import json
+from google import genai
 
+# Env vars
 API_KEY = os.environ.get("GEMINI_API_KEY")
+MAX_OUTPUT_TOKENS = int(os.environ.get("MAX_OUTPUT_TOKENS", 800))
+MAX_INPUT_CHARS = int(os.environ.get("MAX_INPUT_CHARS", 15000))
+
 if not API_KEY:
     raise Exception("Missing GEMINI_API_KEY")
 
-# Configurable limits
-MAX_INPUT_CHARS = int(os.environ.get("MAX_INPUT_CHARS", 12000))
-MAX_OUTPUT_TOKENS = int(os.environ.get("MAX_OUTPUT_TOKENS", 500))
+# Initialize client (auto-reads GEMINI_API_KEY)
+client = genai.Client()
 
-# Read and truncate diff
+# Read diff
 with open("pr.diff", "r") as f:
     diff = f.read()
+
+# Limit input size
 if len(diff) > MAX_INPUT_CHARS:
-    diff = diff[:MAX_INPUT_CHARS] + "\n\n[TRUNCATED DUE TO SIZE]"
+    diff = diff[:MAX_INPUT_CHARS] + "\n\n[TRUNCATED]"
 
-# Prepare prompt
-prompt_text = f"""
-You are a senior engineer performing a code review. Summarize key issues, bugs, and suggestions.
+prompt = f"""
+You are a senior software engineer reviewing a pull request.
 
-Diff:
+Focus on:
+- Bugs
+- Security issues
+- Code quality
+- Performance
+- Best practices
+
+Be concise.
+
+PR Diff:
 {diff}
 """
 
-# Gemini REST API endpoint
-url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-
-body = {
-    "contents": [
-        {"parts": [{"text": prompt_text}]}
-    ],
-    "maxOutputTokens": MAX_OUTPUT_TOKENS
-}
-
-# Call Gemini API
-response = requests.post(
-    url,
-    params={"key": API_KEY},
-    headers={"Content-Type": "application/json"},
-    data=json.dumps(body)
+# Generate response
+response = client.models.generate_content(
+    model="gemini-3-flash-preview",
+    contents=prompt,
+    config={
+        "max_output_tokens": MAX_OUTPUT_TOKENS,
+        "temperature": 0.2
+    }
 )
 
-if response.status_code != 200:
-    raise Exception(f"Gemini API error: {response.status_code} {response.text}")
+# Extract text safely
+review = response.text if hasattr(response, "text") else str(response)
 
-data = response.json()
-# Extract text output
-text_output = ""
-if "candidates" in data:
-    for part in data["candidates"][0]["content"][0]["parts"]:
-        if "text" in part and part["text"]:
-            text_output += part["text"]
-
-# Write review output
+# Write output
 with open("review.txt", "w") as f:
-    f.write(text_output)
+    f.write(review)
 
-print("Gemini review generated.")
+print(f"Review generated (max_tokens={MAX_OUTPUT_TOKENS}, input_chars={len(diff)})")

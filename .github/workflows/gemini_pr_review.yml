@@ -26,6 +26,8 @@ jobs:
 
       - name: Install dependencies
         run: python -m pip install requests
+      - name: Install genai sdk
+        run: pip install -q -U google-genai
 
       - name: Run Gemini Review Script
         env:
