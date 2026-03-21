@@ -3,6 +3,9 @@ import requests
 
 API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
+MAX_OUTPUT_TOKENS = int(os.environ.get("MAX_OUTPUT_TOKENS", 800))
+MAX_INPUT_CHARS = int(os.environ.get("MAX_INPUT_CHARS", 15000))  # rough token control
+
 if not API_KEY:
     raise Exception("Missing ANTHROPIC_API_KEY")
 
@@ -10,8 +13,9 @@ if not API_KEY:
 with open("pr.diff", "r") as f:
     diff = f.read()
 
-# Limit size (important for Claude)
-diff = diff[:20000]
+# Limit input size (very important)
+if len(diff) > MAX_INPUT_CHARS:
+    diff = diff[:MAX_INPUT_CHARS] + "\n\n[TRUNCATED]"
 
 prompt = f"""
 You are a senior software engineer reviewing a pull request.
@@ -23,10 +27,7 @@ Focus on:
 - Performance
 - Best practices
 
-Provide:
-1. Summary
-2. Issues found
-3. Suggestions
+Be concise.
 
 PR Diff:
 {diff}
@@ -41,7 +42,7 @@ response = requests.post(
     },
     json={
         "model": "claude-3-sonnet-20240229",
-        "max_tokens": 1000,
+        "max_tokens": MAX_OUTPUT_TOKENS,
         "messages": [
             {"role": "user", "content": prompt}
         ]
@@ -55,8 +56,7 @@ if "content" not in data:
 
 review = data["content"][0]["text"]
 
-# Save output
 with open("review.txt", "w") as f:
     f.write(review)
 
-print("Review generated successfully.")
+print(f"Review generated (max_tokens={MAX_OUTPUT_TOKENS}, input_chars={len(diff)})")
