@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize]
   branches:
     - main
-
 jobs:
   review:
     runs-on: ubuntu-latest
@@ -19,7 +18,7 @@ jobs:
           git fetch origin ${{ github.base_ref }}
           git diff origin/${{ github.base_ref }} > pr.diff
 
-      - name: Install Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -27,54 +26,11 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Run Claude Review
+      - name: Run Claude Review Script
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          python <<EOF
-import os
-import requests
-
-API_KEY = os.environ["ANTHROPIC_API_KEY"]
-
-with open("pr.diff", "r") as f:
-    diff = f.read()
-
-prompt = f"""
-You are a senior software engineer. Review this pull request diff.
-
-Focus on:
-- Bugs
-- Security issues
-- Code quality
-- Performance
-- Best practices
-
-Give a concise summary and actionable suggestions.
-
-Diff:
-{diff[:2000]}
-"""
-
-response = requests.post(
-    "https://api.anthropic.com/v1/messages",
-    headers={
-        "x-api-key": API_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json"
-    },
-    json={
-        "model": "claude-3-sonnet-20240229",
-        "max_tokens": 1000,
-        "messages": [{"role": "user", "content": prompt}]
-    }
-)
-
-review = response.json()["content"][0]["text"]
-
-with open("review.txt", "w") as f:
-    f.write(review)
-EOF
+          python scripts/claude_review.py
 
       - name: Comment on PR
         uses: actions/github-script@v7
