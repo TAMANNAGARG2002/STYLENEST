@@ -12,7 +12,7 @@ permissions:
   pull-requests: write 
 
 jobs:
-  review:
+  gemini-review:
     runs-on: ubuntu-latest
 
     steps:
