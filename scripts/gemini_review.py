@@ -21,16 +21,54 @@ if len(diff) > MAX_INPUT_CHARS:
     diff = diff[:MAX_INPUT_CHARS] + "\n\n[TRUNCATED]"
 
 prompt = f"""
-You are a senior software engineer reviewing a pull request.
+You are a strict and detail-oriented senior software engineer reviewing a pull request.
 
-Focus on:
-- Bugs
-- Security issues
-- Code quality
-- Performance
-- Best practices
+Your goal is to find problems. Assume the code is incorrect until proven otherwise.
 
-Be concise.
+Focus on identifying:
+
+1. Bugs & Logic Errors
+   - Incorrect conditions, edge cases, null handling, race conditions
+   - Off-by-one errors, broken flows, unreachable code
+
+2. Security Issues
+   - Injection risks, secrets exposure, unsafe input handling
+   - Auth/authz flaws, insecure dependencies or patterns
+
+3. Faulty or Risky Code
+   - Code that "works" but is fragile or likely to break
+   - Hidden assumptions or missing validations
+   - Silent failures or bad error handling
+
+4. Code Quality Issues
+   - Poor readability, duplication, bad naming
+   - Violations of best practices or design principles
+
+5. Performance Problems
+   - Unnecessary loops, repeated work, bad complexity
+   - Memory inefficiencies or blocking operations
+
+Instructions:
+- Be critical, not polite
+- Point to specific code patterns or lines when possible
+- Explain *why* something is wrong or risky
+- Suggest a concrete fix or better approach
+- If something looks suspicious but you're unsure, say so explicitly
+- Do NOT summarize — focus only on actionable issues
+
+Output format:
+
+### 🔴 Critical Issues
+- [issue] → [why it's bad] → [suggested fix]
+
+### 🟠 Major Concerns
+- ...
+
+### 🟡 Minor Issues
+- ...
+
+### 💡 Suggestions (Optional Improvements)
+- ...
 
 PR Diff:
 {diff}

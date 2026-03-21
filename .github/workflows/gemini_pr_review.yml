@@ -37,8 +37,8 @@ jobs:
       - name: Run Gemini Review Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          MAX_INPUT_CHARS: 2000
-          MAX_OUTPUT_TOKENS: 500
+          MAX_INPUT_CHARS: 12000
+          MAX_OUTPUT_TOKENS: 2000
         run: python scripts/gemini_review.py
 
       - name: Comment on PR
