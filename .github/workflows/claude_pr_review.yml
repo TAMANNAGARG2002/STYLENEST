@@ -53,7 +53,7 @@ Focus on:
 Give a concise summary and actionable suggestions.
 
 Diff:
-{diff[:20000]}
+{diff[:2000]}
 """
 
 response = requests.post(
