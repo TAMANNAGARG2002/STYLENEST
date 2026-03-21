@@ -23,14 +23,18 @@ if len(diff) > MAX_INPUT_CHARS:
 prompt = f"""
 You are a senior software engineer reviewing a pull request.
 
-Focus on:
-- Bugs
-- Security issues
-- Code quality
-- Performance
-- Best practices
+Focus ONLY on:
+- Logic errors (bugs, incorrect conditions, edge cases)
+- Security issues (input validation, injection risks, auth issues, secrets)
 
-Be concise.
+Instructions:
+- Be concise
+- Point out exact problems
+- Briefly explain why it's wrong
+- Suggest a fix if possible
+- Ignore style, formatting, and minor improvements
+
+If no issues are found, say: "No logic or security issues found."
 
 PR Diff:
 {diff}

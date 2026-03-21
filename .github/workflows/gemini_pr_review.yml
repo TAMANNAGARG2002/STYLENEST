@@ -12,7 +12,7 @@ permissions:
   pull-requests: write 
 
 jobs:
-  review:
+  gemini-review:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +20,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get PR diff
+        env:
+          EXCLUDE_PATHS: ".github"
         run: |
           git fetch origin ${{ github.base_ref }}
-          git diff origin/${{ github.base_ref }} > pr.diff
+
+          EXCLUDES=""
+          for path in $EXCLUDE_PATHS; do
+            EXCLUDES="$EXCLUDES ':(exclude)$path'"
+          done
+
+          eval "git diff origin/${{ github.base_ref }} -- . $EXCLUDES > pr.diff"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -37,8 +45,8 @@ jobs:
       - name: Run Gemini Review Script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          MAX_INPUT_CHARS: 2000
-          MAX_OUTPUT_TOKENS: 500
+          MAX_INPUT_CHARS: 12000
+          MAX_OUTPUT_TOKENS: 2000
         run: python scripts/gemini_review.py
 
       - name: Comment on PR
