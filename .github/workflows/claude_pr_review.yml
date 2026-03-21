@@ -29,8 +29,8 @@ jobs:
       - name: Run Claude Review Script
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          MAX_OUTPUT_TOKENS: 600
-          MAX_INPUT_CHARS: 12000
+          MAX_OUTPUT_TOKENS: 500
+          MAX_INPUT_CHARS: 2000
         run: |
           python scripts/claude_review.py
 
