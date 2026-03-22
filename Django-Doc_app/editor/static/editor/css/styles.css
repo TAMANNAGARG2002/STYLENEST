@@ -1,0 +1,147 @@
+/* Root theme variables */
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 10px 30px rgba(24, 39, 75, 0.12);
+  --accent: #3b82f6;
+}
+
+html[data-theme="dark"], body[data-theme="dark"] {
+  --bg: #0b1320;
+  --card: #111827;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --border: #1f2937;
+  --shadow: 0 10px 30px rgba(0,0,0,0.6);
+  --accent: #60a5fa;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* App bar */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .6rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+.appbar__brand { font-weight: 800; letter-spacing: .2px; }
+.appbar__logo { color: var(--accent); margin-right: .5rem; }
+.icon-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  padding: .45rem .6rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.icon-btn:hover { background: rgba(0,0,0,0.04); }
+
+/* Container */
+.container {
+  max-width: 1080px;
+  margin: 1rem auto 3rem;
+  padding: 0 1rem;
+}
+
+/* Title row and actions */
+.title-row { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.title-input {
+  flex: 1 1 320px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: .5rem .75rem;
+  border-radius: 10px;
+}
+.title-input::placeholder { color: var(--muted); }
+
+.actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: .45rem .7rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.btn:hover { box-shadow: var(--shadow); }
+.btn-danger { border-color: #ef4444; color: #ef4444; }
+.btn-secondary { border-color: var(--muted); color: var(--muted); }
+
+/* Versions label */
+.versions { display: inline-flex; align-items: center; gap: .4rem; }
+.versions select { padding: .4rem; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+
+/* Toolbar */
+.toolbar {
+  position: sticky; top: 58px; z-index: 900; /* below appbar */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin: 1rem 0;
+}
+.toolbar .ql-formats button#btn-undo,
+.toolbar .ql-formats button#btn-redo {
+  width: 32px; height: 28px; display: inline-grid; place-items: center;
+  border: 0; background: transparent; color: var(--text);
+}
+
+/* Page */
+.page {
+  max-width: 816px; /* ~8.5in */
+  margin: 1rem auto;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.editor {
+  min-height: 900px;
+  padding: 2.2rem;
+}
+
+/* Status bar */
+.status-bar {
+  margin-top: 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--muted);
+}
+.save-indicator { font-variant-numeric: tabular-nums; }
+
+/* Quill theme tweaks */
+.ql-toolbar.ql-snow { border: none; border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0; }
+.ql-container.ql-snow { border: none; }
+.ql-editor { font-size: 16px; line-height: 1.65; }
+.ql-editor h1 { font-size: 2em; }
+.ql-editor h2 { font-size: 1.6em; }
+.ql-editor h3 { font-size: 1.35em; }
+
+/* Dark mode fixes for Quill */
+html[data-theme="dark"] .ql-toolbar .ql-stroke { stroke: var(--text); }
+html[data-theme="dark"] .ql-toolbar .ql-fill { fill: var(--text); }
+html[data-theme="dark"] .ql-picker { color: var(--text); }
+
+/* Responsive */
+@media (max-width: 720px) {
+  .editor { padding: 1rem; }
+  .toolbar { top: 52px; }
+}
