@@ -5,4 +5,5 @@ def redirector(request):
     if request.user.is_authenticated:
         return redirect('chat:lobby')
     else:
-        return redirect('account:login')
+        # return redirect('account:login')
+    
