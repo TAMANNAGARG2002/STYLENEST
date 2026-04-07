@@ -1,0 +1,72 @@
+name: AI PR Review via Lambda
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git diff --text origin/${{ github.base_ref }}...HEAD > pr.diff
+
+      - name: Validate diff
+        run: |
+          if [ ! -s pr.diff ]; then
+            echo "No changes found" > review.txt
+            exit 0
+          fi
+
+      - name: Trim diff
+        run: |
+          head -c 50000 pr.diff > pr_trimmed.diff || cp pr.diff pr_trimmed.diff
+
+      - name: Prepare payload
+        run: |
+          jq -Rs '{diff: .}' pr_trimmed.diff > payload.json
+
+      - name: Call Lambda API
+        run: |
+          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST https://3sdkob7q5amv63rncpciylbuju0taiqn.lambda-url.us-east-1.on.aws/ \
+            -H "Content-Type: application/json" \
+            -d @payload.json)
+
+          echo "Status: $HTTP_CODE"
+          cat response.json
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Lambda call failed"
+            exit 1
+          fi
+
+      - name: Extract Review
+        run: |
+          jq -r '.review // "No review generated"' response.json > review.txt
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('review.txt', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🤖 AI Code Review (Bedrock)\n\n${review}`
+            });
